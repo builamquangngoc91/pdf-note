@@ -1,5 +1,7 @@
 # Margin — Ghi chú PDF
 
+📖 **[Hướng dẫn sử dụng bằng tiếng Việt, kèm ảnh từng màn hình](huong-dan/README.md)**
+
 Website ghi chú PDF tiếng Việt, chạy ở http://localhost:3002.
 
 Truy cập qua Tailscale bằng `http://<IP-Tailscale-của-máy-chủ>:3002` (thiết bị truy cập cần kết nối cùng tailnet). Server lắng nghe trên 0.0.0.0; API vẫn cùng origin, không bật CORS.
