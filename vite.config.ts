@@ -48,6 +48,7 @@ export default defineConfig(async () => {
     css: { postcss: { plugins: [tailwindcss()] } },
     server: {
       host: '0.0.0.0',
+      allowedHosts: ['palas.jbnu.ac.kr'],
       port: 3002,
       strictPort: true,
       cors: false,
