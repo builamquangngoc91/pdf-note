@@ -4,6 +4,14 @@
 
 ## 1. Viết tay và highlight
 
+### Chọn và sao chép chữ có sẵn
+
+Website mở ở chế độ **Chọn chữ / Di chuyển (V)**, chính là icon mũi tên. Kéo chuột qua chữ trong PDF, nhấn **Ctrl+C** (Mac: **Cmd+C**), rồi **Ctrl+V / Cmd+V** để dán vào Word, ô ghi chú hoặc hộp thêm chữ. Bạn cũng có thể nhấp phải vùng đã chọn và chọn **Sao chép**.
+
+Chế độ mũi tên chọn chữ gốc trong trang đang xem, kể cả khi phóng to/thu nhỏ. Kéo vùng trống để di chuyển trang; bấm chữ/hình đã chèn để chỉnh sửa. PDF scan chỉ có ảnh cần OCR trước; ứng dụng hiện chưa có OCR.
+
+### Vẽ trên trang
+
 1. Chọn **Bút viết (P)** hoặc **Đánh dấu (H)**.
 2. Chọn màu nét. Trên màn hình đủ rộng, có thể chỉnh độ dày bằng thanh trượt.
 3. Kéo chuột hoặc bút cảm ứng trên trang để vẽ.
@@ -72,6 +80,7 @@ Dùng công cụ Di chuyển (V) để chọn lại ảnh. Nút tẩy nét dùng
 | Phím | Thao tác |
 | --- | --- |
 | V / P / H / E / T | Di chuyển / bút / highlight / tẩy / thêm chữ |
+| V | Mũi tên: chọn chữ để copy, kéo vùng trống để di chuyển |
 | Ctrl+Z | Undo — hoàn tác |
 | Ctrl+Shift+Z hoặc Ctrl+Y | Redo — làm lại |
 | Ctrl+B / Ctrl+I / Ctrl+U | Đậm / nghiêng / gạch chân khi sửa hoặc chọn hộp chữ |

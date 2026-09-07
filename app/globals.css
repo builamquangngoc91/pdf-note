@@ -518,6 +518,89 @@ button:hover:enabled {
 .annotation-layer.tool-eraser {
   cursor: cell;
 }
+.annotation-layer.tool-select {
+  pointer-events: none;
+}
+/* Text geometry follows the installed PDF.js TextLayer CSS contract. */
+.pdf-text-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.pdf-text-overlay.active {
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: grab;
+}
+.pdf-text-overlay.active .pdf-text-layer :is(span, br) {
+  cursor: text;
+}
+.pdf-text-layer {
+  --scale-round-x: 0.01px;
+  --scale-round-y: 0.01px;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  text-align: initial;
+  line-height: 1;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+}
+.pdf-text-layer :is(span, br) {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  transform-origin: 0 0;
+}
+.pdf-text-layer > :not(.markedContent),
+.pdf-text-layer .markedContent span:not(.markedContent) {
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x))
+    scale(var(--min-font-size-inv));
+}
+.pdf-text-layer .markedContent {
+  display: contents;
+}
+.pdf-text-layer ::selection {
+  background: #5265db55;
+  color: transparent;
+}
+.pdf-text-layer br::selection {
+  background: transparent;
+}
+.pdf-text-layer[data-main-rotation='90'] {
+  transform: rotate(90deg) translateY(-100%);
+}
+.pdf-text-layer[data-main-rotation='180'] {
+  transform: rotate(180deg) translate(-100%, -100%);
+}
+.pdf-text-layer[data-main-rotation='270'] {
+  transform: rotate(270deg) translateX(-100%);
+}
+.pdf-text-status {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  background: #f4f5f9ee;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #525c72;
+  pointer-events: none;
+}
 .paper-loading {
   position: absolute;
   inset: 0;

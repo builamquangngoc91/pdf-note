@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { FileLibrary } from '@/components/file-library';
 import { DocumentHistory } from '@/components/document-history';
+import { PdfTextLayer } from '@/components/pdf-text-layer';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import type { PDFDocumentProxy, PDFDocumentLoadingTask } from 'pdfjs-dist';
@@ -48,7 +49,7 @@ import { exportDocument } from '@/lib/export';
 type Tool = 'select' | 'pen' | 'highlight' | 'eraser' | 'text';
 const colors = ['#292d39', '#5265db', '#e2746b', '#53a68a', '#f3cb53'];
 const tools = [
-  { id: 'select', icon: MousePointer2, name: 'Di chuyển', key: 'V' },
+  { id: 'select', icon: MousePointer2, name: 'Chọn chữ / Di chuyển', key: 'V' },
   { id: 'pen', icon: PenLine, name: 'Bút viết', key: 'P' },
   { id: 'highlight', icon: Highlighter, name: 'Đánh dấu', key: 'H' },
   { id: 'eraser', icon: Eraser, name: 'Tẩy nét', key: 'E' },
@@ -146,7 +147,7 @@ export default function Home() {
   const [workspace, setWorkspace] = useState<Workspace>(empty()),
     [page, setPage] = useState(1),
     [dimensions, setDimensions] = useState({ width: 595, height: 842 });
-  const [tool, setTool] = useState<Tool>('pen'),
+  const [tool, setTool] = useState<Tool>('select'),
     [color, setColor] = useState(colors[1]),
     [width, setWidth] = useState(2.5),
     [zoom, setZoom] = useState(100);
@@ -415,10 +416,11 @@ export default function Home() {
       setWorkspace(state);
     }
   }
-  function pointerDown(e: React.PointerEvent<SVGSVGElement>) {
+  function pointerDown(e: React.PointerEvent) {
     if (busy || !ready || tool === 'text' || e.button !== 0) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     if (tool === 'select') {
+      e.preventDefault();
       if (stage.current)
         pan.current = {
           x: e.clientX,
@@ -444,7 +446,7 @@ export default function Home() {
     drawing.current = s;
     setDraft(s);
   }
-  function pointerMove(e: React.PointerEvent<SVGSVGElement>) {
+  function pointerMove(e: React.PointerEvent) {
     if (pan.current && stage.current) {
       stage.current.scrollLeft = pan.current.left - e.clientX + pan.current.x;
       stage.current.scrollTop = pan.current.top - e.clientY + pan.current.y;
@@ -918,6 +920,28 @@ export default function Home() {
           </div>
           <div
             className="paper"
+            onPointerDown={(event) => {
+              if (
+                tool !== 'select' ||
+                (event.target as Element).closest(
+                  '.pdf-text-layer span, .pdf-text-layer br, .page-object, .object-actions',
+                )
+              )
+                return;
+              pointerDown(event);
+            }}
+            onPointerMove={(event) => {
+              if (tool === 'select') pointerMove(event);
+            }}
+            onPointerUp={() => {
+              if (tool === 'select') pointerUp();
+            }}
+            onPointerCancel={() => {
+              if (tool === 'select') pointerUp();
+            }}
+            onLostPointerCapture={() => {
+              if (tool === 'select') pointerUp();
+            }}
             style={{
               width: (595 * zoom) / 100 + 'px',
               aspectRatio: dimensions.width + '/' + dimensions.height,
@@ -928,6 +952,14 @@ export default function Home() {
               className="pdf-canvas"
               aria-label={'Nội dung PDF trang ' + page}
             />
+            {pdf && (
+              <PdfTextLayer
+                pdf={pdf}
+                page={page}
+                width={(595 * zoom) / 100}
+                active={tool === 'select' && ready && !busy}
+              />
+            )}
             <svg
               ref={svg}
               className={'annotation-layer tool-' + tool}
@@ -1005,7 +1037,11 @@ export default function Home() {
             )}
           </div>
           <div className="paper-bottom">
-            <span>Không gian cho những ý tưởng của bạn.</span>
+            <span>
+              {tool === 'select'
+                ? 'Kéo trên chữ để chọn · Ctrl+C / ⌘C để copy · Kéo vùng trống để di chuyển'
+                : 'Không gian cho những ý tưởng của bạn.'}
+            </span>
             <BookOpen size={16} />
           </div>
         </section>
