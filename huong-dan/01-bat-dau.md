@@ -25,6 +25,7 @@ Bạn cũng có thể kéo thả file PDF vào vùng đọc. PDF có mật khẩ
 ## 3. Điều hướng
 
 - Chuyển trang bằng ảnh thu nhỏ bên trái hoặc nút mũi tên ở dưới.
+- Lăn chuột trong vùng PDF: hết trang thì lăn tiếp xuống để sang đầu trang kế tiếp; ở đầu trang thì lăn lên để về cuối trang trước. Có khoảng nghỉ ngắn giữa các lần chuyển để tránh nhảy nhiều trang do quán tính cuộn.
 - Khi không nhập chữ, phím `←` / `→` chuyển trang. Nếu đang chọn hộp chữ/hình, các phím này di chuyển đối tượng đó.
 - Dùng `−` / `+` cạnh phần trăm zoom để thu/phóng. Bấm con số zoom để về **100%**.
 - Chọn **Di chuyển (V)** rồi kéo trang để cuộn vùng đọc.

@@ -1,5 +1,11 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   BookOpen,
   PenLine,
@@ -46,6 +52,7 @@ import {
 } from '@/lib/annotations';
 import { PdfObjects, type ObjectsHandle } from '@/components/pdf-objects';
 import { exportDocument } from '@/lib/export';
+import { WheelPager } from '@/lib/wheel-pager';
 type Tool = 'select' | 'pen' | 'highlight' | 'eraser' | 'text';
 const colors = ['#292d39', '#5265db', '#e2746b', '#53a68a', '#f3cb53'];
 const tools = [
@@ -164,6 +171,16 @@ export default function Home() {
     [history, setHistory] = useState<Workspace[]>([]),
     [future, setFuture] = useState<Workspace[]>([]);
   const [historyDoc, setHistoryDoc] = useState<Doc | null>(null);
+  const [renderedPage, setRenderedPage] = useState<{
+    pdf: PDFDocumentProxy;
+    page: number;
+  } | null>(null);
+  const wheelPager = useRef(new WheelPager());
+  const wheelDestination = useRef<{
+    pdf: PDFDocumentProxy;
+    page: number;
+    bottom: boolean;
+  } | null>(null);
   const uploadFolder = useRef<string | null>(null),
     saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const objectsRef = useRef<ObjectsHandle>(null);
@@ -312,7 +329,9 @@ export default function Home() {
         canvas.current.height = viewport.height;
         const r = p.render({ canvas: canvas.current, viewport });
         task = r;
-        return r.promise;
+        return r.promise.then(() => {
+          if (!cancelled) setRenderedPage({ pdf, page });
+        });
       })
       .catch((e) => {
         if (e.name !== 'RenderingCancelledException')
@@ -323,6 +342,84 @@ export default function Home() {
       task?.cancel();
     };
   }, [pdf, page]);
+  useEffect(() => {
+    wheelPager.current = new WheelPager();
+    wheelDestination.current = null;
+  }, [pdf]);
+
+  useLayoutEffect(() => {
+    if (
+      !stage.current ||
+      renderedPage?.pdf !== pdf ||
+      renderedPage?.page !== page
+    )
+      return;
+    const destination = wheelDestination.current;
+    stage.current.scrollTop =
+      destination?.pdf === pdf &&
+      destination.page === page &&
+      destination.bottom
+        ? stage.current.scrollHeight - stage.current.clientHeight
+        : 0;
+    wheelDestination.current = null;
+  }, [renderedPage, pdf, page]);
+
+  useEffect(() => {
+    const element = stage.current;
+    if (!element) return;
+    const wheel = (event: WheelEvent) => {
+      if (
+        !pdf ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        (event.target as Element).closest(
+          'input, textarea, select, [contenteditable], .object-actions',
+        )
+      )
+        return;
+      if (
+        busy ||
+        !ready ||
+        library ||
+        historyDoc ||
+        drawing.current ||
+        eraserBefore.current ||
+        pan.current ||
+        wheelDestination.current ||
+        renderedPage?.pdf !== pdf ||
+        renderedPage?.page !== page
+      ) {
+        event.preventDefault();
+        return;
+      }
+      const delta =
+        event.deltaY *
+        (event.deltaMode === 1
+          ? 16
+          : event.deltaMode === 2
+            ? element.clientHeight
+            : 1);
+      const direction = wheelPager.current.step(
+        delta,
+        element.scrollTop,
+        Math.max(0, element.scrollHeight - element.clientHeight),
+        page,
+        pdf.numPages,
+        performance.now(),
+      );
+      if (direction === null) return;
+      event.preventDefault();
+      if (!direction) return;
+      const next = page + direction;
+      wheelDestination.current = { pdf, page: next, bottom: direction < 0 };
+      setPage(next);
+    };
+    element.addEventListener('wheel', wheel, { passive: false });
+    return () => element.removeEventListener('wheel', wheel);
+  }, [pdf, page, busy, ready, library, historyDoc, renderedPage]);
+
   function update(next: Workspace) {
     const previous = current.current;
     setHistory((h) => [...h.slice(-49), previous]);

@@ -459,6 +459,7 @@ button:hover:enabled {
 }
 .document-stage {
   overflow: auto;
+  overscroll-behavior: contain;
   min-width: 0;
   padding: 25px 35px 30px;
   background: #eceef3;
