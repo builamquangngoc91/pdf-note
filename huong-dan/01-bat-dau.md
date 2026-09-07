@@ -35,4 +35,8 @@ Bạn cũng có thể kéo thả file PDF vào vùng đọc. PDF có mật khẩ
 
 Trạng thái gần tên tài liệu chuyển từ **Đang lưu…** sang **Đã lưu** sau khi chỉnh sửa.
 
+Ghi chú lưu trên server theo từng PDF và vẫn còn sau khi restart. Tải lại tab sẽ mở đúng PDF qua ID trong URL; mở địa chỉ website gốc sẽ tiếp tục PDF gần đây nhất. Muốn quay lại file cũ, mở từ **Thư viện**, không tải lên một bản mới.
+
+Nếu server đang restart, giữ tab mở: ứng dụng sẽ tự thử lưu lại phần chưa gửi được.
+
 Nếu thấy **Chưa lưu** hoặc thông báo lỗi, bấm **Thử lại** và giữ trang mở. Không xóa dữ liệu server khi muốn giữ PDF và ghi chú.

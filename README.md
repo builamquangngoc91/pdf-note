@@ -17,6 +17,8 @@ npm run dev
 
 Lệnh dev tạo PDF mẫu/worker và áp dụng migration local. Port được cố định 3002 với strictPort; nếu cổng bận, tiến trình báo lỗi thay vì tự đổi cổng.
 
+Để chạy bản build: `npm run build`, sau đó `npm start`. Cả dev, bản build và migration đều dùng chung thư mục **`.wrangler/state` ở gốc dự án**; restart hoặc build lại không xóa dữ liệu.
+
 ## Chức năng
 
 - Thư viện gồm Tất cả, Gần đây và Thư mục.
@@ -40,6 +42,9 @@ Lệnh dev tạo PDF mẫu/worker và áp dụng migration local. Port được 
 Giao diện, API /api/documents, tài liệu, font hệ thống và PDF worker đều cùng origin.
 Không bật CORS và từ chối mutation từ origin khác. Không tải font/CDN bên ngoài.
 Dữ liệu phát triển nằm trong .wrangler/state; không xóa thư mục này nếu cần giữ tài liệu.
+PDF gốc, ảnh và ghi chú được lưu theo ID của từng PDF; lịch sử cũng gắn với ID đó. URL có `?pdf=<id>` để tải lại vẫn mở đúng file. Khi vào URL gốc, ứng dụng mở PDF được xem gần đây nhất. Mở file đã lưu từ thư viện; tải lên lần nữa tạo một bản PDF riêng.
+
+Khi server tạm ngừng, ghi chú chưa gửi thành công sẽ được thử lưu lại tự động trong tab đang mở. Chờ trạng thái **Đã lưu** trước khi đóng tab. Để chuyển máy hoặc sao lưu, dừng server rồi sao chép toàn bộ `.wrangler/state` (gồm cả D1 và R2); dữ liệu này không được push lên GitHub.
 Đây là workspace cá nhân; không triển khai công khai như ứng dụng nhiều tài khoản khi chưa thêm phân quyền người dùng.
 
 ## Kiểm tra

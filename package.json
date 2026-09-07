@@ -8,13 +8,14 @@
   "scripts": {
     "dev": "vinext dev --host 0.0.0.0 --port 3002 --strictPort",
     "build": "vinext build",
-    "start": "wrangler dev --config dist/server/wrangler.json --port 3002",
+    "start": "wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/state --ip 0.0.0.0 --port 3002",
     "lint": "oxlint",
     "format": "oxfmt",
     "db:generate": "drizzle-kit generate",
     "predev": "node scripts/assets.mjs && npm run db:local",
+    "prestart": "node scripts/assets.mjs && npm run db:local",
     "prebuild": "node scripts/assets.mjs",
-    "db:local": "wrangler d1 migrations apply DB --local --config wrangler.local.json"
+    "db:local": "wrangler d1 migrations apply DB --local --config wrangler.local.json --persist-to .wrangler/state"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

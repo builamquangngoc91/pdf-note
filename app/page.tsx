@@ -53,6 +53,7 @@ import {
 import { PdfObjects, type ObjectsHandle } from '@/components/pdf-objects';
 import { exportDocument } from '@/lib/export';
 import { WheelPager } from '@/lib/wheel-pager';
+import { startupDocument } from '@/lib/document-session';
 type Tool = 'select' | 'pen' | 'highlight' | 'eraser' | 'text';
 const colors = ['#292d39', '#5265db', '#e2746b', '#53a68a', '#f3cb53'];
 const tools = [
@@ -252,6 +253,9 @@ export default function Home() {
         livePdf.current = loading;
         setPdf(next);
         setDoc(record);
+        const url = new URL(window.location.href);
+        url.searchParams.set('pdf', record.id);
+        window.history.replaceState(window.history.state, '', url);
         setWorkspace(state);
         current.current = state;
         void fetch('/api/documents/' + record.id + '/opened', {
@@ -275,8 +279,32 @@ export default function Home() {
     [save],
   );
   useEffect(() => {
-    void openDocument(sample);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const requested = new URL(window.location.href).searchParams.get('pdf');
+        if (requested === 'sample') {
+          if (!cancelled) await openDocument(sample);
+          return;
+        }
+        const response = await fetch('/api/documents');
+        if (!response.ok)
+          throw new Error(
+            'Không tải được thư viện. Hãy tải lại trang khi server sẵn sàng.',
+          );
+        const records = (await response.json()) as Doc[];
+        const record = startupDocument(records, requested, sample);
+        if (!cancelled) await openDocument(record);
+      } catch (e) {
+        if (!cancelled) {
+          setBusy(false);
+          setError(e instanceof Error ? e.message : 'Không mở được tài liệu.');
+          setStatus('Chưa mở được PDF');
+        }
+      }
+    })();
     return () => {
+      cancelled = true;
       generation.current++;
       void livePdf.current?.destroy();
     };
@@ -286,7 +314,9 @@ export default function Home() {
     setStatus('Đang lưu…');
     const id = doc.id,
       snapshot = workspace;
-    const timer = setTimeout(() => {
+    let cancelled = false;
+    let retryDelay = 1000;
+    const attempt = () => {
       void save(id, snapshot)
         .then(() => {
           if (current.current === snapshot && docRef.current.id === id) {
@@ -295,12 +325,24 @@ export default function Home() {
           }
         })
         .catch((e) => {
+          if (
+            cancelled ||
+            current.current !== snapshot ||
+            docRef.current.id !== id
+          )
+            return;
           setStatus('Chưa lưu');
           setError(e.message);
+          saveTimer.current = setTimeout(attempt, retryDelay);
+          retryDelay = Math.min(retryDelay * 2, 10000);
         });
-    }, 650);
+    };
+    const timer = setTimeout(attempt, 650);
     saveTimer.current = timer;
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
   }, [workspace, doc.id, ready, save]);
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
